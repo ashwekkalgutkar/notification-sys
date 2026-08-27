@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <linearGradient id="og" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF9500"/>
+      <stop offset="100%" stop-color="#FF5500"/>
+    </linearGradient>
+  </defs>
+  <!-- White rounded-square background -->
+  <rect width="32" height="32" rx="7" fill="#ffffff"/>
+  <!-- Bell body -->
+  <path d="M16 4a8 8 0 0 0-8 8c0 6-3 8-3 8h22s-3-2-3-8a8 8 0 0 0-8-8z" fill="url(#og)"/>
+  <!-- Bell clapper -->
+  <circle cx="16" cy="27" r="2" fill="url(#og)"/>
+</svg>
