@@ -1,0 +1,184 @@
+<div class="form-container">
+  <div class="form-header">
+    <!-- Rule 2: Page Title (24px, semibold) -->
+    <h2>{{ isEditMode ? 'Edit Rule' : 'New Rule Builder' }}</h2>
+    <button class="btn btn-secondary" (click)="cancelled.emit()">
+      <svg class="icon-svg icon-sm" viewBox="0 0 24 24">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+      Back to Rules
+    </button>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+
+  <form [formGroup]="ruleForm" (ngSubmit)="onSubmit()" class="rule-reactive-form">
+    <!-- Rule Name & Trigger Event -->
+    <div class="form-row">
+      <div class="form-group flex-1">
+        <label for="rule-name">Rule Name <span class="required">*</span></label>
+        <input
+          id="rule-name"
+          type="text"
+          formControlName="name"
+          placeholder="e.g. High-Value Order Alert"
+        />
+        <span class="field-error" *ngIf="ruleForm.get('name')?.invalid && ruleForm.get('name')?.touched">
+          Rule name is required (min 3 characters).
+        </span>
+      </div>
+
+      <div class="form-group flex-1">
+        <label for="trigger-event">Trigger Event Name <span class="required">*</span></label>
+        <input
+          id="trigger-event"
+          type="text"
+          formControlName="triggerEvent"
+          placeholder="e.g. order.created"
+        />
+        <span class="field-error" *ngIf="ruleForm.get('triggerEvent')?.invalid && ruleForm.get('triggerEvent')?.touched">
+          Event trigger string is required.
+        </span>
+      </div>
+    </div>
+
+    <!-- Rule 3: Single Section Panel for Conditions -->
+    <div class="section-panel">
+      <div class="section-header">
+        <div>
+          <!-- Rule 2: Section Header (16px, semibold) -->
+          <h3>Dynamic Conditions (AND Logic)</h3>
+          <!-- Rule 2: Caption (12px, light grey) -->
+          <p class="section-desc">
+            All specified conditions must evaluate to true against incoming event payload keys.
+          </p>
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm" (click)="addConditionRow()">
+          <svg class="icon-svg icon-sm" viewBox="0 0 24 24">
+            <path d="M5 12h14M12 5v14"/>
+          </svg>
+          Add Condition Row
+        </button>
+      </div>
+
+      <div formArrayName="conditions" class="conditions-list">
+        <div
+          *ngFor="let condGroup of conditionsFormArray.controls; let i = index"
+          [formGroupName]="i"
+          class="condition-row"
+        >
+          <span class="row-num">#{{ i + 1 }}</span>
+
+          <div class="form-group flex-2">
+            <input
+              type="text"
+              formControlName="field"
+              placeholder="Field path (e.g. orderValue)"
+            />
+          </div>
+
+          <div class="form-group flex-2">
+            <app-glass-select formControlName="operator" [options]="operatorOptions"></app-glass-select>
+          </div>
+
+          <div class="form-group flex-2">
+            <input
+              type="text"
+              formControlName="value"
+              placeholder="Target value (e.g. 10000)"
+            />
+          </div>
+
+          <button
+            type="button"
+            class="btn-action-icon danger"
+            (click)="removeConditionRow(i)"
+            title="Remove Condition"
+            [disabled]="conditionsFormArray.length === 1 && i === 0"
+          >
+            <svg class="icon-svg icon-sm" viewBox="0 0 24 24">
+              <path d="M3 6h18"/>
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recipients & Channels -->
+    <div class="form-row">
+      <div class="form-group flex-1">
+        <label for="recipients">Recipients (Comma-Separated) <span class="required">*</span></label>
+        <input
+          id="recipients"
+          type="text"
+          formControlName="recipientsInput"
+          placeholder="e.g. finance@acme.com, manager@acme.com"
+        />
+        <!-- Rule 2: Helper text (12px) -->
+        <span class="hint">Enter email addresses or recipient user IDs separated by commas.</span>
+      </div>
+
+      <div class="form-group flex-1" formGroupName="channels">
+        <label>Notification Channels <span class="required">*</span></label>
+        <div class="channels-checkbox-group">
+          <label class="checkbox-label">
+            <input type="checkbox" formControlName="email" />
+            Email Channel
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" formControlName="in_app" />
+            In-App Channel
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Message Template Editor -->
+    <div class="form-group">
+      <label for="message-template">Message Template <span class="required">*</span></label>
+      <textarea
+        id="message-template"
+        rows="3"
+        formControlName="messageTemplate"
+        [attr.placeholder]="'e.g. Order {{orderId}} created for {{customerName}} with value ${{orderValue}}!'"
+      ></textarea>
+      
+      <div class="template-helper">
+        <span class="hint" *ngIf="getDetectedPlaceholders().length === 0">
+          Use <code>{{ '{{field}}' }}</code> syntax to dynamically interpolate event payload variables.
+        </span>
+        <div *ngIf="getDetectedPlaceholders().length > 0" class="detected-placeholders">
+          <span class="hint">Detected Placeholders:</span>
+          <span *ngFor="let p of getDetectedPlaceholders()" class="placeholder-chip">
+            {{ '{{' + p + '}}' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Enable Toggle -->
+    <div class="inline-toggle">
+      <label class="toggle-switch">
+        <input type="checkbox" formControlName="isEnabled" />
+        <span class="slider"></span>
+      </label>
+      <span class="toggle-text">Enable this notification rule immediately</span>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" (click)="cancelled.emit()">
+        Cancel
+      </button>
+      <!-- Rule 1: Flat Primary Action Button -->
+      <button type="submit" class="btn btn-primary" [disabled]="isSubmitting">
+        <span *ngIf="isSubmitting" class="spinner-sm"></span>
+        {{ isEditMode ? 'Update Rule' : 'Save Rule' }}
+      </button>
+    </div>
+  </form>
+</div>

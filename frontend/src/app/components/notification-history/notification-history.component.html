@@ -1,0 +1,169 @@
+<div class="history-container">
+  <!-- Filter Row -->
+  <div class="filter-row">
+    <div class="filter-group">
+      <label>Status</label>
+      <app-glass-select
+        [(ngModel)]="statusFilter"
+        [options]="statusOptions"
+        (change)="applyFilters()"
+      ></app-glass-select>
+    </div>
+
+    <div class="filter-group">
+      <label>Channel</label>
+      <app-glass-select
+        [(ngModel)]="channelFilter"
+        [options]="channelOptions"
+        (change)="applyFilters()"
+      ></app-glass-select>
+    </div>
+
+    <div class="filter-group">
+      <label for="recipient-filter">Recipient Search</label>
+      <input
+        id="recipient-filter"
+        type="text"
+        placeholder="Filter by recipient..."
+        [(ngModel)]="recipientFilter"
+        (input)="applyFilters()"
+      />
+    </div>
+
+    <div class="filter-actions">
+      <button class="btn btn-secondary btn-sm" (click)="clearFilters()">
+        Reset Filters
+      </button>
+      <button class="btn btn-secondary btn-sm" (click)="loadLogs(meta.page)" [disabled]="isLoading">
+        <svg class="icon-svg icon-sm" viewBox="0 0 24 24">
+          <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
+          <path d="M21 3v5h-5"/>
+        </svg>
+        Refresh
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="isLoading" class="empty-state">
+    <div class="spinner"></div>
+    <p class="type-caption">Loading dispatch log history...</p>
+  </div>
+
+  <div *ngIf="!isLoading && logs.length === 0" class="empty-state">
+    <h3 class="type-section">No Dispatch Logs</h3>
+    <p class="type-caption">No notification dispatch records match the selected filter criteria.</p>
+  </div>
+
+  <div *ngIf="!isLoading && logs.length > 0" class="table-responsive">
+    <table class="custom-table">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>Event ID</th>
+          <th>Rule ID / Name</th>
+          <th>Recipient</th>
+          <th>Channel</th>
+          <th>Status</th>
+          <th style="text-align: right;">Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let log of logs">
+          <td>
+            <span class="type-caption">{{ log.timestamp | date:'short' }}</span>
+          </td>
+          <td>
+            <span class="event-id-tag">{{ log.eventId }}</span>
+          </td>
+          <td>
+            <span class="type-label" style="color: var(--color-title);">{{ log.rule?.name || log.ruleId }}</span>
+          </td>
+          <td>
+            <span class="type-label">{{ log.recipient }}</span>
+          </td>
+          <td>
+            <span class="code-tag-sm">{{ log.channel }}</span>
+          </td>
+          <td>
+            <span class="status-pill" [ngClass]="{
+              'status-sent': log.status === 'sent',
+              'status-failed': log.status === 'failed',
+              'status-skipped': log.status === 'skipped'
+            }">
+              {{ log.status | uppercase }}
+            </span>
+          </td>
+          <td style="text-align: right;">
+            <button class="btn-action-icon" (click)="inspectPayload(log)" title="Inspect Payload">
+              <svg class="icon-svg icon-sm" viewBox="0 0 24 24">
+                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination Bar -->
+  <div *ngIf="!isLoading && logs.length > 0" class="pagination-bar">
+    <span class="type-caption">
+      Showing {{ (meta.page - 1) * meta.limit + 1 }} - {{ Math.min(meta.page * meta.limit, meta.total) }} of {{ meta.total }} logs
+    </span>
+    <div class="filter-actions">
+      <button
+        class="btn btn-secondary btn-sm"
+        [disabled]="!meta.hasPreviousPage"
+        (click)="goToPage(meta.page - 1)"
+      >
+        Previous
+      </button>
+      <span class="type-caption" style="align-self: center;">Page {{ meta.page }} of {{ meta.totalPages }}</span>
+      <button
+        class="btn btn-secondary btn-sm"
+        [disabled]="!meta.hasNextPage"
+        (click)="goToPage(meta.page + 1)"
+      >
+        Next
+      </button>
+    </div>
+  </div>
+
+  <!-- Log Detail Modal -->
+  <div *ngIf="selectedLogDetails" class="modal-backdrop" (click)="closePayloadModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="type-section">Dispatch Detail</h3>
+        <button class="btn-action-icon" (click)="closePayloadModal()">
+          <svg class="icon-svg icon-sm" viewBox="0 0 24 24">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="log-meta-box">
+          <div><strong>Rule:</strong> {{ selectedLogDetails.rule?.name || selectedLogDetails.ruleId }}</div>
+          <div><strong>Channel:</strong> {{ selectedLogDetails.channel }}</div>
+          <div><strong>Recipient:</strong> {{ selectedLogDetails.recipient }}</div>
+          <div><strong>Status:</strong> {{ selectedLogDetails.status | uppercase }}</div>
+          <div *ngIf="selectedLogDetails.reason" class="error-reason">
+            <strong>Reason:</strong> {{ selectedLogDetails.reason }}
+          </div>
+        </div>
+
+        <div class="detail-row">
+          <span class="type-label">Evaluated Event Payload:</span>
+          <pre class="json-block">{{ selectedPayloadForModal | json }}</pre>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closePayloadModal()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

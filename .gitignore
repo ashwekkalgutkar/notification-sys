@@ -1,0 +1,46 @@
+# ── Dependencies ──────────────────────────────────────────────
+node_modules/
+
+# ── Build output ──────────────────────────────────────────────
+dist/
+out-tsc/
+
+# ── Environment & secrets ─────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Database files ────────────────────────────────────────────
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# ── Test & coverage artifacts ─────────────────────────────────
+coverage/
+
+# ── Angular cache ─────────────────────────────────────────────
+.angular/
+
+# ── IDEs & editors ────────────────────────────────────────────
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.sublime-workspace
+*.launch
+.history/
+
+# ── OS artifacts ──────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Logs ──────────────────────────────────────────────────────
+npm-debug.log*
+yarn-error.log*
+
+# ── Misc ──────────────────────────────────────────────────────
+/tmp
+*.tsbuildinfo

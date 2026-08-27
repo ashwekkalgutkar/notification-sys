@@ -1,0 +1,29 @@
+<div class="glass-select-wrapper" [class.open]="isOpen" [class.disabled]="disabled" [class]="customClass">
+  <button
+    type="button"
+    class="glass-select-trigger"
+    (click)="toggleDropdown()"
+    [disabled]="disabled"
+  >
+    <span class="selected-text" [class.is-placeholder]="value === '' || value === null">
+      {{ selectedLabel }}
+    </span>
+    <svg class="chevron-icon" [class.rotated]="isOpen" viewBox="0 0 24 24">
+      <path d="M6 9l6 6 6-6" />
+    </svg>
+  </button>
+
+  <div *ngIf="isOpen" class="glass-options-dropdown">
+    <div
+      *ngFor="let opt of options"
+      class="glass-option-item"
+      [class.selected]="opt.value === value"
+      (click)="selectOption(opt, $event)"
+    >
+      <span>{{ opt.label }}</span>
+      <svg *ngIf="opt.value === value" class="check-icon" viewBox="0 0 24 24">
+        <path d="M20 6L9 17l-5-5" />
+      </svg>
+    </div>
+  </div>
+</div>

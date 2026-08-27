@@ -1,0 +1,37 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model NotificationRule {
+  id              String            @id @default(uuid())
+  name            String
+  triggerEvent    String
+  conditions      String            // JSON stringified Condition[]
+  recipients      String            // JSON stringified string[]
+  channels        String            // JSON stringified string[]
+  messageTemplate String
+  isEnabled       Boolean           @default(true)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  logs            NotificationLog[]
+}
+
+model NotificationLog {
+  id        String           @id @default(uuid())
+  ruleId    String
+  recipient String
+  channel   String
+  status    String           // 'sent' | 'failed' | 'skipped'
+  payload   String           // JSON stringified event payload
+  reason    String?          // Error or skip reason
+  eventId   String           // Idempotency / Event ID
+  timestamp DateTime         @default(now())
+  rule      NotificationRule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, ruleId, recipient, channel], name: "unique_event_dispatch")
+}

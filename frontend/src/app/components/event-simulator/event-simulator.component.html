@@ -1,0 +1,155 @@
+<div class="simulator-container">
+  <!-- Header -->
+  <div class="header-block">
+    <!-- Rule 2: Page Title (24px) -->
+    <h2>Event Trigger & Pipeline Simulator</h2>
+    <!-- Rule 2: Helper/Caption text (12px) -->
+    <p>Simulate real-time upstream events to test rule evaluation, condition matching, template interpolation, and deduplication.</p>
+  </div>
+
+  <div class="simulator-grid">
+    <!-- Event Form Panel -->
+    <div class="form-panel">
+      <!-- Rule 2: Section Header (16px) -->
+      <h3 class="panel-title">Event Configuration</h3>
+
+      <div *ngIf="errorMessage" class="alert alert-danger">
+        {{ errorMessage }}
+      </div>
+
+      <!-- Presets -->
+      <div class="form-group">
+        <!-- Rule 2: Field Label (13px) -->
+        <label>Load Preset Template</label>
+        <div class="preset-chips">
+          <button
+            *ngFor="let p of presetTemplates"
+            type="button"
+            class="chip-btn"
+            (click)="applyPreset(p)"
+          >
+            {{ p.name }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Event Type Name -->
+      <div class="form-group">
+        <label for="sim-event-type">Event Type Name</label>
+        <input
+          id="sim-event-type"
+          type="text"
+          [(ngModel)]="eventType"
+          placeholder="e.g. order.created"
+        />
+      </div>
+
+      <!-- Event ID -->
+      <div class="form-group">
+        <div class="label-with-actions">
+          <label for="sim-event-id">Event ID (Idempotency Key)</label>
+          <div class="id-actions">
+            <button type="button" class="link-btn" (click)="generateNewEventId()">
+              Generate Unique ID
+            </button>
+            <button type="button" class="link-btn" (click)="useLastSubmittedEventId()" [disabled]="!lastSubmittedEventId">
+              Re-use Last ID (Test Dedup)
+            </button>
+          </div>
+        </div>
+        <input
+          id="sim-event-id"
+          type="text"
+          [(ngModel)]="eventId"
+          placeholder="e.g. evt_12345"
+        />
+        <!-- Rule 2: Helper/Caption text (12px) -->
+        <span class="hint">Submitting an identical Event ID twice will test database-level unique constraint deduplication.</span>
+      </div>
+
+      <!-- JSON Payload -->
+      <div class="form-group">
+        <label for="sim-json-payload">Event JSON Payload</label>
+        <textarea
+          id="sim-json-payload"
+          class="terminal-textarea"
+          rows="8"
+          [(ngModel)]="jsonPayloadString"
+          placeholder="Enter raw JSON payload..."
+        ></textarea>
+      </div>
+
+      <!-- Rule 1: Flat Primary Action Button (No Gradients) -->
+      <button
+        type="button"
+        class="btn btn-primary btn-block"
+        (click)="triggerEvent()"
+        [disabled]="isSubmitting"
+      >
+        <span *ngIf="isSubmitting" class="spinner-sm"></span>
+        <svg *ngIf="!isSubmitting" class="icon-svg icon-sm" viewBox="0 0 24 24">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+        {{ isSubmitting ? 'Processing Pipeline...' : 'Dispatch Event to Pipeline' }}
+      </button>
+    </div>
+
+    <!-- Results Panel -->
+    <div class="results-panel">
+      <h3 class="panel-title">Dispatch Execution Results</h3>
+
+      <div *ngIf="!lastResponse" class="empty-results">
+        <p>No Events Dispatched Yet</p>
+        <small>Fill in the event payload and click "Dispatch Event" to trigger the engine.</small>
+      </div>
+
+      <div *ngIf="lastResponse" class="simulator-container" style="gap: 1rem;">
+        <!-- Summary Banner -->
+        <div class="summary-banner">
+          <div class="banner-stat">
+            <span class="stat-label">Event ID</span>
+            <code>{{ lastResponse.eventId }}</code>
+          </div>
+          <div class="banner-stat">
+            <span class="stat-label">Matched Rules</span>
+            <span class="stat-value">{{ lastResponse.matchedRulesCount }}</span>
+          </div>
+          <div class="banner-stat">
+            <span class="stat-label">Total Dispatches</span>
+            <span class="stat-value">{{ lastResponse.dispatches.length }}</span>
+          </div>
+        </div>
+
+        <div *ngIf="lastResponse.dispatches.length === 0" class="alert alert-danger" style="margin: 0;">
+          No notification rules matched the event conditions.
+        </div>
+
+        <!-- Dispatch List -->
+        <div *ngIf="lastResponse.dispatches.length > 0" class="dispatch-list">
+          <div
+            *ngFor="let item of lastResponse.dispatches"
+            class="dispatch-item"
+          >
+            <div class="item-header">
+              <span class="rule-name">{{ item.ruleName }}</span>
+              <span class="status-pill" [ngClass]="{
+                'status-sent': item.status === 'sent',
+                'status-failed': item.status === 'failed',
+                'status-skipped': item.status === 'skipped'
+              }">
+                {{ item.status | uppercase }}
+              </span>
+            </div>
+            <div class="item-details">
+              <div><strong>Recipient:</strong> {{ item.recipient }}</div>
+              <div><strong>Channel:</strong> {{ item.channel }}</div>
+              <div *ngIf="item.reason" class="reason-text">
+                Reason: {{ item.reason }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

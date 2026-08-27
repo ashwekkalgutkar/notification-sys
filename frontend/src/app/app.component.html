@@ -1,0 +1,76 @@
+<div class="app-layout">
+  <!-- Floating Glassmorphic Header -->
+  <div class="header-wrapper">
+    <header class="app-header">
+      <div class="header-content">
+        <div class="brand">
+          <div class="logo-icon">
+            <svg class="logo-svg" viewBox="0 0 24 24">
+              <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+              <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <h1>Notify<span class="brand-accent">Hub</span></h1>
+            <span class="subtitle">Configurable Notification Engine</span>
+          </div>
+        </div>
+
+        <nav class="nav-tabs">
+          <button
+            class="nav-tab"
+            [class.active]="activeTab === 'rules'"
+            (click)="switchTab('rules')"
+          >
+            Rules Engine
+          </button>
+          <button
+            class="nav-tab"
+            [class.active]="activeTab === 'form'"
+            (click)="switchTab('form')"
+          >
+            {{ ruleToEdit ? 'Edit Rule' : 'New Rule Builder' }}
+          </button>
+          <button
+            class="nav-tab"
+            [class.active]="activeTab === 'history'"
+            (click)="switchTab('history')"
+          >
+            Dispatch Logs
+          </button>
+          <button
+            class="nav-tab"
+            [class.active]="activeTab === 'simulator'"
+            (click)="switchTab('simulator')"
+          >
+            Live Simulator
+          </button>
+        </nav>
+      </div>
+    </header>
+  </div>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+    <app-rule-list
+      *ngIf="activeTab === 'rules'"
+      (editRule)="onEditRule($event)"
+      (createNew)="onCreateNewRule()"
+    ></app-rule-list>
+
+    <app-rule-form
+      *ngIf="activeTab === 'form'"
+      [ruleToEdit]="ruleToEdit"
+      (saved)="onRuleSaved()"
+      (cancelled)="onFormCancelled()"
+    ></app-rule-form>
+
+    <app-notification-history
+      *ngIf="activeTab === 'history'"
+    ></app-notification-history>
+
+    <app-event-simulator
+      *ngIf="activeTab === 'simulator'"
+    ></app-event-simulator>
+  </main>
+</div>
