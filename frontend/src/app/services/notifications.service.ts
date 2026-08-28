@@ -6,12 +6,13 @@ import {
   NotificationQueryFilter,
   PaginatedResponse,
 } from '../models/notification.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class NotificationsService {
-  private readonly apiUrl = 'http://localhost:3000/api/notifications';
+  private readonly apiUrl = `${environment.apiUrl}/api/notifications`;
 
   constructor(private readonly http: HttpClient) {}
 

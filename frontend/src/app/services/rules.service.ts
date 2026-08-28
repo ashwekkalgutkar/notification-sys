@@ -6,12 +6,13 @@ import {
   CreateRuleRequest,
   UpdateRuleRequest,
 } from '../models/rule.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class RulesService {
-  private readonly apiUrl = 'http://localhost:3000/api/rules';
+  private readonly apiUrl = `${environment.apiUrl}/api/rules`;
 
   constructor(private readonly http: HttpClient) {}
 
