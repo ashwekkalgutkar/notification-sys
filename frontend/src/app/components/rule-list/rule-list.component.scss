@@ -10,6 +10,16 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 1rem;
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+
+    .btn-primary {
+      width: 100%;
+    }
+  }
 }
 
 .search-and-filter {
@@ -17,6 +27,12 @@
   align-items: center;
   gap: 0.85rem;
   flex-wrap: wrap;
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
 }
 
 .search-box {
@@ -29,9 +45,14 @@
   border-radius: var(--radius-pill);
   padding: 0.45rem 1rem;
   width: 320px;
+  max-width: 100%;
   gap: 0.6rem;
   box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.6), 0 2px 8px rgba(15, 23, 42, 0.03);
   transition: all 0.2s ease;
+
+  @media (max-width: 640px) {
+    width: 100%;
+  }
 
   &:focus-within {
     background: rgba(255, 255, 255, 0.9);
@@ -54,6 +75,7 @@
     padding: 0 !important;
     font-size: 0.8125rem;
     color: var(--color-title);
+    width: 100%;
 
     &:focus {
       border: none !important;
@@ -78,6 +100,10 @@
   padding: 3px;
   gap: 3px;
 
+  @media (max-width: 640px) {
+    width: 100%;
+  }
+
   .pill {
     border: none;
     background: transparent;
@@ -88,6 +114,13 @@
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
+
+    @media (max-width: 640px) {
+      flex: 1;
+      text-align: center;
+      padding: 0.4rem 0.5rem;
+      font-size: 0.75rem;
+    }
 
     &.active {
       background: var(--accent-orange);

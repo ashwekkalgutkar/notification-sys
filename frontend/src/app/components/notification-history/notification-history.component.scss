@@ -18,6 +18,12 @@
   border-radius: var(--radius-lg);
   padding: 1.15rem 1.35rem;
   box-shadow: var(--shadow-glass);
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1rem;
+  }
 }
 
 .filter-group {
@@ -32,12 +38,26 @@
     font-weight: 600;
     color: var(--color-label);
   }
+
+  @media (max-width: 640px) {
+    width: 100%;
+    min-width: 100%;
+  }
 }
 
 .filter-actions {
   display: flex;
   gap: 0.6rem;
   align-items: flex-end;
+
+  @media (max-width: 640px) {
+    width: 100%;
+    justify-content: flex-end;
+
+    button {
+      flex: 1;
+    }
+  }
 }
 
 .code-tag-sm {
@@ -94,6 +114,15 @@
   padding-top: 0.5rem;
   flex-wrap: wrap;
   gap: 0.85rem;
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    text-align: center;
+
+    .filter-actions {
+      justify-content: center;
+    }
+  }
 }
 
 .json-block {
@@ -122,6 +151,10 @@
   font-size: 0.8125rem;
   color: var(--color-section);
   margin-bottom: 1rem;
+
+  @media (max-width: 500px) {
+    grid-template-columns: 1fr;
+  }
 
   .error-reason {
     grid-column: 1 / -1;
